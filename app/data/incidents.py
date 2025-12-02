@@ -1,11 +1,27 @@
 import pandas as pd
-import sqlite3
-def insert_data(conn, incident_id, timestamp, severity, category, status, description):
+from app.data.db import connect_database
+
+def insert_data(incident_id, timestamp, severity, category, status, description):
+    conn = connect_database()
     curr = conn.cursor()
     sql = ("""INSERT INTO cyber_incidents (incident_id, timestamp, severity, category, status, description ) VALUES (?,?,?,?,?,?)""")
     param = (incident_id, timestamp, severity, category, status, description)
     curr.execute(sql, param)
     conn.commit()
+    incident_id = curr.lastrowid
+    conn.close()
+    return incident_id
+def insert_incident(date, incident_type, severity, status, description, reported_by=None):
+    conn = connect_database()
+    curr = conn.cursor()
+    sql = ("""INSERT INTO cyber_incident (date, incident_type, severity, status, description, reported_by) VALUES (?,?,?,?,?,?)""")
+    param = (date, incident_type, severity, status, description, reported_by)
+    curr.execute(sql, param)
+    conn.commit()
+    incident_id = curr.lastrowid
+    conn.close()
+    return incident_id
+
 
 def fetch_all_user(conn):
     curr = conn.cursor()
@@ -29,8 +45,11 @@ def delete_users(conn):
     conn.commit()
     return f"Deleted User {curr.rowcount()}"
 
-def get_all_users_pandas(conn):
-    query = "SELECT * FROM cyber_incidents"
+def get_all_incidents_pandas(conn):
+    conn = connect_database()
+    query = "SELECT * FROM cyber_incident ORDER BY id DESC"
     df = pd.read_sql(query, conn)
     return df
+
+
 

@@ -1,11 +1,13 @@
 import pandas as pd
-import sqlite3
-def insert_data(conn, dataset_id, name, rows, columns, uploaded_by, upload_date):
+from app.data.db import connect_database
+def insert_data(dataset_id, name, rows, columns, uploaded_by, upload_date):
+    conn = connect_database()
     curr = conn.cursor()
     sql = ("""INSERT INTO datasets_metadata (dataset_id, name, rows, columns, uploaded_by, upload_date) VALUES (?,?,?,?,?,?)""")
     param = (dataset_id, name, rows, columns, uploaded_by, upload_date)
     curr.execute(sql, param)
     conn.commit()
+
 
 def fetch_all_user(conn):
     curr = conn.cursor()
@@ -29,7 +31,8 @@ def delete_users(conn):
     conn.commit()
     return f"Deleted User {curr.rowcount()}"
 
-def get_all_users_pandas(conn):
+def get_all_datasets_pandas():
+    conn = connect_database()
     query = "SELECT * FROM datasets_metadata"
     df = pd.read_sql(query, conn)
     return df
