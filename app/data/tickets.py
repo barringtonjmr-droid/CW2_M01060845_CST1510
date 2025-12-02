@@ -29,7 +29,7 @@ def delete_users(conn):
     conn.commit()
     return f"Deleted User {curr.rowcount()}"
 
-def get_all_users_pandas(conn):
+def get_all_tickets_pandas(conn):
     query = "SELECT * FROM it_tickets"
     df = pd.read_sql(query, conn)
     return df

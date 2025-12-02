@@ -1,28 +1,36 @@
-from api import register_user, login
-
-def menu():
-    print("\nPlease choose an option:")
-    print("1 - Register User")
-    print("2 - Login")
-    print("3 - Exit")
+from app.data.db import connect_database
+from app.data.schema import create_all_tables
+from app.services.userservice import register_user, login_user, migrate_users_from_file
+from app.data.incidents import insert_incident, get_all_incidents_pandas
 
 def main():
-    """Runs program"""
-    while True:
-        menu()
-        choice = input("Enter choice: ")
-        if choice == "1":
-            register_user()
-        elif choice == "2":
-            login()
-        elif choice == "3":
-            print("Closing program...")
-            break
-        else:
-            print("Invalid choice. Try again.")
+    print("=" * 60)
+    print("Week 8: Database Demo")
+    print("=" * 60)
 
-main()
+conn = connect_database('DATA/intelligence.db')
+create_all_tables(conn)
+conn.close()
 
+migrate_users_from_file(conn)
 
+success, msg = register_user("alice", "SecurePass123!")
+print(msg)
+sucess, msg = login_user("alice", "SecurePass123!")
+print(msg)
 
+incident_id = insert_incident(
+    "2024-11-05",
+    "Phishing",
+    "High",
+    "Open",
+    "Suspicious email detected",
+    "alice"
+)
+print(f"Created incident #{incident_id}")
 
+df = get_all_incidents_pandas(conn)
+print(f"Total incidents: {len(df)}")
+
+if __name__ == "__main__":
+    main() 
