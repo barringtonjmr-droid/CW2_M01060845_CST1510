@@ -3,7 +3,7 @@ import sqlite3
 from pathlib import Path
 from app.data.db import connect_database
 from app.data.users import get_one_user, insert_data
-from app.data.schema import create_table
+import pandas as pd
 DATA_DIR = Path('DATA')
 path = DATA_DIR
 def register_user(username, password):
@@ -83,16 +83,19 @@ def migrate_users_from_file(conn, filepath=path / "users.txt"):
     print(f":white_check_mark: Migrated {migrated_count} users from {filepath.name}")
 
 def migrate_cyber_incidents(conn):
+    conn = connect_database()
     df = pd.read_csv('DATA/cyber_incidents.csv')
     df.to_sql('cyber_incidents', conn, if_exists='append', index=False)
     print('Data load')
 
 def migrate_datasets_metadata(conn):
+    conn = connect_database()
     df = pd.read_csv('DATA/datasets_metadata.csv')
     df.to_sql('datasets_metadata', conn, if_exists='append', index=False)
     print('Data load')
     
 def migrate_it_tickets(conn):
+    conn = connect_database()
     df = pd.read_csv('DATA/it_tickets.csv')
     df.to_sql('it_tickets', conn, if_exists='append', index=False)
     print('Data load')

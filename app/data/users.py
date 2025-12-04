@@ -19,6 +19,7 @@ def insert_user_data(username, password, role='user'):
     conn.close()
 
 def fetch_all_user(conn):
+    conn = connect_database()
     curr = conn.cursor()
     sql = """ SELECT * FROM users """
     curr.execute(sql)
@@ -27,6 +28,7 @@ def fetch_all_user(conn):
     return rows
 
 def update_users(conn):
+    conn = connect_database()
     curr = conn.cursor()
     curr.execute("""UPDATE users SET username = ? WHERE username is = ? """,('Polly_23','Barry'))
     conn.commit()
@@ -35,12 +37,14 @@ def update_users(conn):
     return f'Updated Result {result}'
 
 def delete_users(conn):
+    conn = connect_database()
     curr = conn.cursor()
     curr.execute("""DELETE FROM users WHERE username = ?""",('Barry',))
     conn.commit()
     return f"Deleted User {curr.rowcount()}"
 
 def get_all_users_pandas(conn):
+    conn = connect_database()
     query = "SELECT * FROM users"
     df = pd.read_sql(query, conn)
     return df
