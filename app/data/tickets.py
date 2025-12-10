@@ -1,6 +1,8 @@
 import pandas as pd
 import sqlite3
-def insert_data(conn, ticket_id, priority, description, status, assigned_to, created_at, resolution_time_hours):
+from app.data.db import connect_database
+def insert_data(ticket_id, priority, description, status, assigned_to, created_at, resolution_time_hours):
+    conn = connect_database()
     curr = conn.cursor()
     sql = ("""INSERT INTO datasets_metadata (ticket_id, priority, description, status, assigned_to, created_at, resolution_time_hours) VALUES (?,?,?,?,?,?,?)""")
     param = (ticket_id, priority, description, status, assigned_to, created_at, resolution_time_hours)
@@ -15,7 +17,8 @@ def fetch_all_user(conn):
     conn.close()
     return rows
 
-def update_users(conn):
+def update_tickets(conn):
+    conn = connect_database()
     curr = conn.cursor()
     curr.execute("""UPDATE it_tickets SET priority = ? WHERE ticket_id is = ? """,('Critical', 2005))
     conn.commit()
@@ -23,7 +26,8 @@ def update_users(conn):
     result = curr.fetchone()
     return f'Updated Result {result}'
 
-def delete_users(conn):
+def delete_tickets(conn):
+    conn = connect_database()
     curr = conn.cursor
     curr.execute("""DELETE FROM it_tickets WHERE ticket_id = ?""",(2005,))
     conn.commit()

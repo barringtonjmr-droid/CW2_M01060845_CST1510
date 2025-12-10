@@ -17,7 +17,8 @@ def fetch_all_user(conn):
     conn.close()
     return rows
 
-def update_users(conn):
+def update_datasets(conn):
+    conn = connect_database()
     curr = conn.cursor()
     curr.execute("""UPDATE datasets_metadata SET name = ? WHERE dataset_id is = ? """,('Monetary_Development', 2))
     conn.commit()
@@ -25,7 +26,8 @@ def update_users(conn):
     result = curr.fetchone()
     return f'Updated Result {result}'
 
-def delete_users(conn):
+def delete_datasets(conn):
+    conn = connect_database()
     curr = conn.cursor
     curr.execute("""DELETE FROM datasets_metadata WHERE dataset_id = ?""",(2,))
     conn.commit()

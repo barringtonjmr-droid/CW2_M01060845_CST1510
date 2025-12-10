@@ -44,9 +44,9 @@ def delete_users(conn):
     return f"Deleted User {curr.rowcount()}"
 
 def get_all_users_pandas(conn):
-    conn = connect_database()
     query = "SELECT * FROM users"
     df = pd.read_sql(query, conn)
+    conn.close()
     return df
 def get_one_user(username):
     """Retrieve user by username"""
