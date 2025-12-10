@@ -11,11 +11,11 @@ class AuthManager:
     """Handles user registration and login"""
 
     def __init__(self, db_path: Path = DB_PATH):
-        self.db = DatabaseManager(db_path)
+        self.__db = DatabaseManager(db_path)
 
     def registers_user(self, username: str, password: str):
         """Register a new user."""
-        exists = self.db.fetch_one(
+        exists = self.__db.fetch_one(
             "SELECT 1 FROM users WHERE username = ?",
             (username,)
         )
@@ -27,7 +27,7 @@ class AuthManager:
             bcrypt.gensalt()
         ).decode('utf-8')
 
-        created = self.db.execute(
+        created = self.__db.execute(
             "INSERT INTO users (username, password) VALUES (?, ?)",
             (username, hashed_password)
         )
@@ -39,7 +39,7 @@ class AuthManager:
 
     def login_user(self, username: str, password: str):
         """Authenticate user using User class."""
-        user_record = self.db.fetch_one(
+        user_record = self.__db.fetch_one(
             "SELECT username, password FROM users WHERE username = ?",
             (username,)
         )
