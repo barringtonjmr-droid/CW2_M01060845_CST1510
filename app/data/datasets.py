@@ -1,5 +1,5 @@
 import pandas as pd
-from app.data.db import connect_database
+from database.db import connect_database
 def insert_data(dataset_id, name, rows, columns, uploaded_by, upload_date):
     conn = connect_database()
     curr = conn.cursor()

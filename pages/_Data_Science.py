@@ -1,9 +1,10 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from app.data.db import connect_database
+from database.db import connect_database
 import streamlit as st
 from app.data.datasets import get_all_datasets_pandas, insert_data, update_datasets, delete_datasets
 import pandas as pd
+from models.dataset import Dataset
 
 conn = connect_database()
 st.title("Data Science Management")
@@ -24,20 +25,32 @@ with st.expander("Add New Dataset"):
     rows = st.number_input("Number of Rows")
     columns = st.number_input("Number of Columns", min_value=1)
     uploaded_by = st.text_input("Uploaded By")
-    uploaded_at = st.text_input("Created At (YYYY-MM-DD)")
+    uploaded_date = st.text_input("Created At (YYYY-MM-DD)")
 
     if st.button("Add Dataset"):
         # Validate fields
-        if not all([dataset_id, name, rows, columns, uploaded_by, uploaded_at]):
+        if not all([dataset_id, name, rows, columns, uploaded_by, uploaded_date]):
             st.warning("All fields are required.")
         else:
-            new_id = insert_data(
+            try:
+                dataset = Dataset(
                 dataset_id,
                 name,
                 rows,
                 columns,
                 uploaded_by,
-                uploaded_at
+                uploaded_date
+            )
+            except Exception as e:
+                st.error(f"Error creating dataset: {e}")
+                st.stop()
+            new_id = insert_data(
+                dataset.get_dataset_id(),
+                dataset.get_name(),
+                dataset.get_rows(),
+                dataset.get_columns(),
+                dataset.get_uploaded_by(),
+                dataset.get_uploaded_date()
             )
             st.success(f"Dataset successfully added! New ID: {new_id}")
 

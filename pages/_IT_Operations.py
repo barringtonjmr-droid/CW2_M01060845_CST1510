@@ -1,9 +1,10 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from app.data.db import connect_database
+from database.db import connect_database
 import streamlit as st
 from app.data.tickets import get_all_tickets_pandas, insert_data, update_tickets, delete_tickets
 import pandas as pd
+from models.it_ticket import ITTicket
 
 conn = connect_database()
 st.title("IT Ticket Management")
@@ -25,7 +26,7 @@ with st.expander("Add New IT Ticket"):
     description = st.text_area("Description")
     status = st.selectbox("Status", ["Open", "In Progress", "Resolved"])
     assigned_to = st.text_input("Assigned To")
-    created_at = st.text_input("Created At (YYYY-MM-DD HH:MM)")
+    created_at = st.text_input("Created At (YYYY-MM-DD HH:MM:SS)")
     resolution_time_hours = st.number_input("Resolution Time (Hours)", min_value=0)
 
     if st.button("Add Ticket"):
@@ -33,7 +34,8 @@ with st.expander("Add New IT Ticket"):
         if not all([ticket_id, priority, description, status, assigned_to, created_at]):
             st.warning("All fields are required.")
         else:
-            new_id = insert_data(
+            try:
+                ticket = ITTicket(
                 ticket_id,
                 priority,
                 description,
@@ -41,6 +43,18 @@ with st.expander("Add New IT Ticket"):
                 assigned_to,
                 created_at,
                 resolution_time_hours
+            )
+            except Exception as e:
+                st.error(f"Error creating ticket: {e}")
+                st.stop()
+            new_id = insert_data(
+                ticket.get_ticket_id(),
+                ticket.get_priority(),
+                ticket.get_description(),
+                ticket.get_status(),
+                ticket.get_assigned_to(),
+                ticket.get_created_at(),
+                ticket.get_resolution_time_hours()
             )
             st.success(f"Ticket successfully added! New ID: {new_id}")
 
@@ -100,4 +114,9 @@ else:
 
     st.subheader("Resolution Time Distribution")
     st.bar_chart(df["resolution_time_hours"])
+
+    st.markdown("---")
+    st.subheader("Tickets Assigned to Staff Members")
+    assigned_counts = df["assigned_to"].value_counts()
+    st.bar_chart(assigned_counts)
 

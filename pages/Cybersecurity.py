@@ -1,9 +1,10 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from app.data.db import connect_database
+from database.db import connect_database
 import streamlit as st
 from app.data.incidents import get_all_incidents_pandas, insert_data, update_incidents, delete_incidents
 import pandas as pd
+from models.cyber_incident import CyberIncident
 
 
 
@@ -34,13 +35,25 @@ with st.expander("Add New Cyber Incident"):
         if not all([incident_id, timestamp, severity, category, status, description]):
             st.warning("All fields are required.")
         else:
-            new_id = insert_data(
+            try:
+                incident = CyberIncident(
                 incident_id,
                 timestamp,
                 severity,
                 category,
                 status,
                 description
+            )
+            except Exception as e:
+                st.error(f"Error creating incident: {e}")
+                st.stop()
+            new_id = insert_data(
+                incident.get_incident_id(),
+                incident.get_timestamp(),
+                incident.get_severity(),
+                incident.get_category(),
+                incident.get_status(),
+                incident.get_description()
             )
             st.success(f"Incident successfully added! New ID: {new_id}")
 
@@ -106,7 +119,6 @@ else:
 
     if "timestamp" in df.columns:
         st.subheader("⏱ Incident Timeline (by Date)")
-        
-        df["date"] = pd.to_datetime(df["timestamp"]).dt.date
+        df["date"] = pd.to_datetime(df["timestamp"],format="mixed",errors="coerce").dt.date 
         timeline_counts = df["date"].value_counts().sort_index()
         st.line_chart(timeline_counts)

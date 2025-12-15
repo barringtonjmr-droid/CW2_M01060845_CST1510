@@ -1,48 +1,53 @@
 import bcrypt
 import sqlite3
 from pathlib import Path
-from app.data.db import connect_database
-from app.data.users import get_one_user, insert_data
+from database.db import connect_database
+from app.data.users import insert_data
 import pandas as pd
-DATA_DIR = Path('DATA')
-path = DATA_DIR
-def register_user(username, password):
-    """Register new user with password hashing."""
-    conn = connect_database()
-    curr = conn.cursor()
-    curr.execute("SELECT * FROM users WHERE username = ?", (username,))
-    if curr.fetchone():
-        conn.close()
-        return False, f"Username '{username}' already exists."
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'),
-                 bcrypt.gensalt()).decode('utf-8')
-    insert_data(username, hashed_password)
-    return True, f"User '{username} registered sucessfully."
+from services.database_manager import DatabaseManager
+from models.user import User
 
-def register_new_user(username, password, role='user'):
-    """Register new user with password hashing."""
-    conn = connect_database()
-    curr = conn.cursor()
-    curr.execute("SELECT * FROM users WHERE username = ?", (username,))
-    if curr.fetchone():
-        conn.close()
-        return False, f"Username '{username}' already exists."
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'),
-                 bcrypt.gensalt()).decode('utf-8')
-    insert_data(username, hashed_password, role)
-    return True, f"User '{username} registered sucessfully."
+#Object Oriented User Service
+class UserService:
+    def __init__(self, db_path: Path = Path("database") / "intelligence.db"):
+        self.__db = DatabaseManager(db_path)
+    
+    def register_user(self, username: str, password: str):
+        """Register new user with password hashing."""
+        exists = self.__db.fetch_one(
+            "SELECT 1 FROM users WHERE username = ?",
+            (username,)
+        )
+        if exists:
+            return False, f"Username '{username}' already exists."
+        hashed_password = bcrypt.hashpw(
+            password.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+        created = self.__db.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            (username, hashed_password)
+        )
+        if created:
+            return True, f"User '{username}' registered successfully."
+        return False, "Registration failed due to a database error."
+    
+    def login_user(self, username: str, password: str):
+        user_record = self.__db.fetch_one(
+            "SELECT username, password FROM users WHERE username = ?",
+            (username,)
+        )
+        if not user_record:
+            return False, "User not found"
+        username_db, stored_hash = user_record
+        user = User(username_db, stored_hash)
+        if user.validate_password(password):
+            return True, user
+        return False, "Incorrect password"
 
-def login_user(username, password):
-    """Authenticate user."""
-    user = get_one_user(username)
-    if not user:
-        return False, "User not found"
-    #Verify password
-    stored_hash = user[2]
-    if bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
-        return True, 'Login sucessfully'
-    return False, "Incorrect password"  
 
+# Data Migration Functions
+path1 = Path('DATA') / 'users.txt'
 def migrate_info(conn):
     with open('DATA/users.txt', 'r') as f:
         users = f.readlines()
@@ -50,9 +55,10 @@ def migrate_info(conn):
         name, hash = (user.strip().split(',',1))
         insert_data(conn, name, hash)
     conn.close()
-def migrate_users_from_file(conn, filepath=path / "users.txt"):
+
+def migrate_users_from_file(conn, filepath=path1):
     """Migrates users from users.txt to the database"""
-    conn = connect_database("DATA/intelligence.db")
+    conn = connect_database()
     if not filepath.exists():
         print(f':warning: File not found: {filepath}')
         print("No users to migrate.")

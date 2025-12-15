@@ -1,6 +1,6 @@
 import sqlite3
 import pandas as pd
-from app.data.db import connect_database
+from database.db import connect_database
 
 def insert_data(incident_id, timestamp, severity, category, status, description):
     conn = connect_database()
@@ -55,6 +55,7 @@ def delete_users(conn):
     conn.commit()
     return f"Deleted User {curr.rowcount()}"
 def delete_incidents(conn):
+    conn = connect_database()
     curr = conn.cursor()
     curr.execute("DELETE FROM cyber_incidents WHERE incident_id = ?",(1010,))
     conn.commit()

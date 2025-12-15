@@ -2,8 +2,8 @@ import sys
 import os
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(PROJECT_ROOT)
-from app.services.database_manager import DatabaseManager
-from app.services.auth_manager import AuthManager 
+from services.database_manager import DatabaseManager
+from services.auth_manager import AuthManager 
 import streamlit as st
 
 

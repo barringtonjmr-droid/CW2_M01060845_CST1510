@@ -1,5 +1,5 @@
 import pandas as pd
-from app.data.db import connect_database
+from database.db import connect_database
 def insert_data(username, password):
     conn = connect_database()
     curr = conn.cursor()

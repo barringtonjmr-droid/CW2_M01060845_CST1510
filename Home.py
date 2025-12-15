@@ -10,7 +10,14 @@ st.set_page_config(page_title="Home", layout="wide")
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-st.title("Welcome to the Student Dashboard")
+st.title("Welcome to the Multi-Domain Intelligence Platform")
+st.write("""
+This platform provides access to various domain-specific dashboards, including:
+- Cybersecurity
+- Datasets
+- IT Operations
+- AI Assistant
+""")
 
 if st.session_state.logged_in:
     st.success(f"Logged in as: {st.session_state.username}")

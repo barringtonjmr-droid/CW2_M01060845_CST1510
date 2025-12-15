@@ -1,4 +1,4 @@
-from app.data.db import connect_database
+from database.db import connect_database
 from app.data.schema import create_all_tables
 from app.services.userservice import register_user, login_user, migrate_users_from_file
 from app.data.incidents import insert_incident, get_all_incidents_pandas

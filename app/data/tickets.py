@@ -1,6 +1,6 @@
 import pandas as pd
 import sqlite3
-from app.data.db import connect_database
+from database.db import connect_database
 def insert_data(ticket_id, priority, description, status, assigned_to, created_at, resolution_time_hours):
     conn = connect_database()
     curr = conn.cursor()

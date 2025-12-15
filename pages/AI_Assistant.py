@@ -3,7 +3,7 @@ import streamlit as st
 from openai import OpenAI
 from openai import APIError, RateLimitError, APITimeoutError
 
-from app.services.ai_assistant import AIAssistant  
+from services.ai_assistant import AIAssistant  
 
 
 client = OpenAI(api_key=st.secrets["OPEN_API_KEY"])
